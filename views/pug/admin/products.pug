@@ -1,0 +1,34 @@
+extends ../../layouts/main-layout.pug
+
+block styles 
+    link(rel="stylesheet", href="/css/product.css")
+    link(rel="stylesheet", href="/css/forms.css")
+
+block content 
+    main
+        h1= "Welcome to admin products page"
+        if products.length > 0
+            .grid
+                each product in products
+                    article.card.product-item
+                        header.card__header
+                            h1.product__title= product.title
+
+                        .card__image
+                            img(src= product.imgUrl, alt= product.title)
+                            
+                        .card__content
+                            h2.product__price #{product.price}$
+                            p.product__description= product.description
+                            
+                        .card__actions
+                            a(href=`/admin/edit-product/${product._id}?edit=true` class="btn") Edit 
+                            form(action="/admin/delete-product?_method=DELETE" method="POST") 
+                                button.btn(type="submit") Delete
+                                input(type="hidden" name='id' value=`${product._id}`)
+
+        else 
+            h2 No Products
+
+
+
