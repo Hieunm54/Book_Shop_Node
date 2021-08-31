@@ -21,11 +21,13 @@ const getProductFromFile = (callback) => {
 };
 
 class Product {
-	constructor(title, imgUrl, price, description) {
+	constructor(title, imgUrl, price, description,id,userId) {
 		this.title = title;
 		this.imgUrl = imgUrl;
 		this.price = price;
 		this.description = description;
+		this._id = id ? ObjectId(id): null;
+		this.userId = userId;
 	}
 
 	// save a product
@@ -55,7 +57,7 @@ class Product {
 			.collection("products")
 			.findOne({ _id: ObjectId(id) })
 			.then((product) => {
-				console.log("Fetching product: " + product);
+				// console.log("Fetching product: " + product);
 				return product;
 			})
 			.catch((err) => {

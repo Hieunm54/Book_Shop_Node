@@ -1,5 +1,6 @@
 import Product from "../models/product.js";
 import Cart from "../models/cart.js";
+import User from "../models/user.js";
 
 class ShopController {
 	// [GET] /
@@ -36,7 +37,7 @@ class ShopController {
 	// [GET] /products/:id
 	getProductById = (req, res, next) => {
 		const id = req.params.id;
-		console.log('id in getProductById ', id);
+		console.log("id in getProductById ", id);
 		Product.fetchProductById(id)
 			.then((product) => {
 				res.render("shop/product-details", {
@@ -52,46 +53,34 @@ class ShopController {
 
 	// [GET] /cart
 	getCart = (req, res, next) => {
-		Cart.getCartData((data) => {
-			const cartData = [];
-			Product.fetchAll()
-				.then((products) => {
-					for (let product of products) {
-						const cartProduct = data.products.find(
-							(p) => p.id === product.id
-						);
-						if (cartProduct) {
-							cartData.push({
-								product,
-								quantity: cartProduct.quantity,
-							});
-						}
-					}
-
-					res.render("shop/cart", {
-						title: "My Cart",
-						text: "This is my Cart",
-						products: cartData,
-						total: data.total,
-						path: "/cart",
-					});
-				})
-				.catch((err) => console.log(err));
-		});
+		const user = req.user;
+		user.getUserCart()
+			.then((products) => {
+				res.render("shop/cart", {
+					title: "My Cart",
+					text: "This is my Cart",
+					products,
+					total: 0,
+					path: "/cart",
+				});
+			})
+			.catch((err) => {
+				throw err;
+			});
 	};
 
 	// [POST] /cart
 	postCart = (req, res, next) => {
 		const id = req.body.id;
-		console.log("postCart ", id);
+		const user = req.user;
 		Product.fetchProductById(id)
 			.then((product) => {
-				Cart.addToCart(id, product.price);
+				return user.addToCart(product);
 			})
-			.catch((error) => {
-				throw error;
+			.then((result) => {
+				console.log(result);
+				res.redirect("/cart");
 			});
-		res.redirect("/cart");
 	};
 
 	// [DELETE] /cart/delete-product
@@ -99,8 +88,11 @@ class ShopController {
 		const id = req.body.id;
 		Product.fetchProductById(id)
 			.then((product) => {
-				Cart.deleteProduct(id, product.price);
-				res.redirect("/cart");
+				// Cart.deleteProduct(id, product.price);
+				return req.user
+						.deleteCartProduct(id)
+						.then(() => res.redirect("/cart"))
+						.catch(err=> console.error(err));
 			})
 			.catch((error) => {
 				throw error;

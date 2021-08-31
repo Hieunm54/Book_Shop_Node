@@ -1,0 +1,30 @@
+extends ../../layouts/main-layout.pug
+
+block styles 
+    link(rel="stylesheet", href="/css/product.css")
+    link(rel="stylesheet", href="/css/forms.css")
+
+block content 
+    main
+        h1= "Welcome to admin-user page"
+        if users.length > 0
+            .grid
+                each user in users
+                    article.card.product-item
+                        header.card__header
+                            h1.product__title= user.name
+                        .card__image
+                            img(src= user.avatar, alt= user.name)              
+                        .card__content
+                            p.product__description= user.email     
+                        .card__actions
+                            a(href=`` class="btn") Edit 
+                            form(action="?_method=DELETE" method="POST") 
+                                button.btn(type="submit") Delete
+                                input(type="hidden" name='id' value=`${user._id}`)
+
+        else 
+            h2 No Users
+
+
+

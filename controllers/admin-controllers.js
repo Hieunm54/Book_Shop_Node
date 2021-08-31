@@ -1,6 +1,6 @@
 import Product from "../models/product.js";
 import Cart from "../models/cart.js";
-
+import User from "../models/user.js"
 class AdminController {
 	// [GET] /admin/add-product
 	getAddProduct = (req, res, next) => {
@@ -29,11 +29,12 @@ class AdminController {
 	// [POST ] /admin/add-product
 	postProduct = (req, res, next) => {
 		const { title, imgUrl, price, description } = req.body;
-		const product = new Product(title, imgUrl, +price, description);
+		const userId = req.user._id
+		const product = new Product(title, imgUrl, +price, description,null,userId);
 		product
 			.save()
 			.then((result) => {
-				console.log("product add: ", result);
+				// console.log("product add: ", result);
 				res.redirect("/");
 			})
 			.catch((err) => {
@@ -89,6 +90,40 @@ class AdminController {
 			res.redirect("/admin/products");
 		});
 	};
+
+	// [GET] /admin/users/
+	getUsers = (req, res, next) => {
+		User.fetchAll()
+			.then(users =>{
+				res.render("user/users",{
+					title: "Users",
+					users,
+					path: "/admin/users"
+				})
+			})
+			.catch(err => {
+				throw err;
+			})
+	}
+
+	// [GET] /admin/add-users
+	getAddUser = (req, res, next)=>{
+		res.render("user/add-user",{path:'admin/add-user'});
+	}
+
+	// [POST] /admin/add-users
+	postAddUser = (req, res, next)=>{
+		const {name,avatar,email} = req.body;
+		const newUser = new User(name,avatar, email);
+		newUser.save()
+			.then(()=>{
+				res.redirect("/admin/users");
+			})
+			.catch(err => {
+				console.log(err);
+			})
+	}
+	
 }
 
 export default AdminController;

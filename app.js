@@ -10,6 +10,8 @@ const errorHandler = new ErrorHandler();
 
 import mongoConnect from './util/database.js'
 
+import User from './models/user.js';
+
 const __dirname = path.resolve();
 
 const app = express();
@@ -21,11 +23,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // mongodb connection
-
-
-
 //* override with POST having ?_method= PUT/DELETE
 app.use(methodOverride('_method'));
+
+app.use((req,res,next) => {
+    User.findUserById("6129f1b0cc4d4144a3d338e8")
+        .then((user)=>{
+            req.user = new User(user.name,user.avatar,user.email,user.cart,user._id);
+            next();
+        })
+        .catch((err) => {
+            console.log("Error");
+        })
+})
 
 app.use('/admin',adminRouter);
 app.use(productRouter);
