@@ -100,12 +100,24 @@ class ShopController {
 	};
 
 	getOrder = (req, res, next) => {
-		res.render("shop/order", {
-			title: "My Order",
-			text: "This is my Order",
-			path: "/order",
-		});
+		req.user.getUserOrder()
+			.then((orders) =>{	
+				res.render("shop/order", {
+					title: "My Order",
+					text: "This is the Order from:",
+					orders,
+					path: "/order",
+				});
+			})
+			.catch(err=> console.error(err));
 	};
+
+	addOrder = (req, res, next)=>{
+		req.user.addOrder()
+			.then(() => res.redirect("/order"))
+			.catch(err=> console.error(err));
+
+	}
 
 	getCheckout = (req, res, next) => {
 		res.render("shop/checkout", {

@@ -3,22 +3,10 @@ import path from "path";
 import dirname from "../util/path.js";
 // import ObjectId from 'mongodb'
 
-import Cart from "./cart.js";
 
 import { getDb } from "../util/database.js";
 import { ObjectId } from "bson";
 
-const p = path.join(dirname, "data", "product.json");
-
-const getProductFromFile = (callback) => {
-	fs.readFile(p, (err, data) => {
-		if (err) {
-			callback([]);
-		} else {
-			callback(JSON.parse(data));
-		}
-	});
-};
 
 class Product {
 	constructor(title, imgUrl, price, description,id,userId) {
