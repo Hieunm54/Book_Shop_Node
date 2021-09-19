@@ -1,6 +1,6 @@
 import Product from "../models/product.js";
-import Cart from "../models/cart.js";
-import User from "../models/user.js"
+// import User from "../models/user.js"
+
 class AdminController {
 	// [GET] /admin/add-product
 	getAddProduct = (req, res, next) => {
@@ -12,7 +12,7 @@ class AdminController {
 
 	// [GET] /admin/products
 	getAdminProduct = (req, res, next) => {
-		Product.fetchAll()
+		Product.find({})
 			.then((products) => {
 				res.render("admin/products", {
 					title: "My Shop",
@@ -29,8 +29,14 @@ class AdminController {
 	// [POST ] /admin/add-product
 	postProduct = (req, res, next) => {
 		const { title, imgUrl, price, description } = req.body;
-		const userId = req.user._id
-		const product = new Product(title, imgUrl, +price, description,null,userId);
+		// const userId = req.user._id;
+		const product = new Product({
+			title: title,
+			imgUrl: imgUrl,
+			price: price,
+			description: description,
+			userId: req.user._id
+		});
 		product
 			.save()
 			.then((result) => {
@@ -49,7 +55,7 @@ class AdminController {
 		if (!editingMode) {
 			return res.redirect("/");
 		}
-		Product.fetchProductById(id)
+		Product.findById(id)
 			.then((product) => {
 				res.render("admin/edit-product", {
 					title: "Edit Page",
@@ -67,26 +73,44 @@ class AdminController {
 		const id = req.body.id;
 		const { title, imgUrl, price, description } = req.body;
 
-		Product.updateProduct(
-			id,
+		Product.findByIdAndUpdate(id,
 			{
-				_id: id,
+				// _id: id,
 				title: title,
 				imgUrl: imgUrl,
-				price: +price,
+				price: price,
 				description: description,
 			},
-			() => {
-				res.redirect("/admin/products");
+			{
+				runValidators: true
 			}
-		);
+			,
+			()=>{
+				res.redirect("/admin/products");
+
+			}
+		)
+		
+		// (
+		// 	id,
+		// 	{
+		// 		_id: id,
+		// 		title: title,
+		// 		imgUrl: imgUrl,
+		// 		price: +price,
+		// 		description: description,
+		// 	},
+		// 	() => {
+		// 		res.redirect("/admin/products");
+		// 	}
+		// );
 	};
 
 	// [DELETE] /admin/delete-product
 	deleteProduct = (req, res, next) => {
 		const id = req.body.id;
 		// Cart.deleteProduct(id);
-		Product.deleteProduct(id, () => {
+		Product.findByIdAndDelete(id, () => {
 			res.redirect("/admin/products");
 		});
 	};
@@ -94,36 +118,36 @@ class AdminController {
 	// [GET] /admin/users/
 	getUsers = (req, res, next) => {
 		User.fetchAll()
-			.then(users =>{
-				res.render("user/users",{
+			.then((users) => {
+				res.render("user/users", {
 					title: "Users",
 					users,
-					path: "/admin/users"
-				})
+					path: "/admin/users",
+				});
 			})
-			.catch(err => {
+			.catch((err) => {
 				throw err;
-			})
-	}
+			});
+	};
 
 	// [GET] /admin/add-users
-	getAddUser = (req, res, next)=>{
-		res.render("user/add-user",{path:'admin/add-user'});
-	}
+	getAddUser = (req, res, next) => {
+		res.render("user/add-user", { path: "admin/add-user" });
+	};
 
 	// [POST] /admin/add-users
-	postAddUser = (req, res, next)=>{
-		const {name,avatar,email} = req.body;
-		const newUser = new User(name,avatar, email);
-		newUser.save()
-			.then(()=>{
+	postAddUser = (req, res, next) => {
+		const { name, avatar, email } = req.body;
+		const newUser = new User(name, avatar, email);
+		newUser
+			.save()
+			.then(() => {
 				res.redirect("/admin/users");
 			})
-			.catch(err => {
+			.catch((err) => {
 				console.log(err);
-			})
-	}
-	
+			});
+	};
 }
 
 export default AdminController;

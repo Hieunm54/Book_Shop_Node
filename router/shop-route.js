@@ -15,10 +15,10 @@ router.get('/cart', shopController.getCart);
 router.post('/cart', shopController.postCart);
 router.delete('/cart/delete-product', shopController.deleteCartProduct);
 
-router.get('/order', shopController.getOrder);
-router.post('/create-order', shopController.addOrder);
+// router.get('/order', shopController.getOrder);
+// router.post('/create-order', shopController.addOrder);
 
-router.get('/checkout', shopController.getCheckout);
+// router.get('/checkout', shopController.getCheckout);
 
 router.get('/',shopController.getIndex);
 

@@ -10,11 +10,11 @@ block content
                 ul.cart__item-list
                     each p in products
                         li.cart__item 
-                            h1.cart__item-title #{p.title} 
+                            h1.cart__item-title #{p.productId.title} 
                             h2.cart__item-quantity= `Quantity: ${p.quantity}`
                             form(action="/cart/delete-product?_method=DELETE" method="POST") 
                                 button.btn.danger Delete
-                                input(type="hidden" name='id' value=`${p._id}` )
+                                input(type="hidden" name='id' value=`${p.productId._id}` )
                 hr
                 .centered
                     form(action="/create-order" method="POST") 

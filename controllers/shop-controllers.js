@@ -1,11 +1,9 @@
 import Product from "../models/product.js";
-import Cart from "../models/cart.js";
-import User from "../models/user.js";
 
 class ShopController {
 	// [GET] /
 	getIndex = (req, res, next) => {
-		Product.fetchAll()
+		Product.find({})
 			.then((products) => {
 				res.render("shop/index", {
 					title: "My Shop",
@@ -21,7 +19,7 @@ class ShopController {
 
 	// [GET] /products
 	getAllProducts = (req, res, next) => {
-		Product.fetchAll()
+		Product.find({})
 			.then((products) => {
 				res.render("shop/product-list", {
 					title: "All Products",
@@ -37,8 +35,7 @@ class ShopController {
 	// [GET] /products/:id
 	getProductById = (req, res, next) => {
 		const id = req.params.id;
-		console.log("id in getProductById ", id);
-		Product.fetchProductById(id)
+		Product.findById(id)
 			.then((product) => {
 				res.render("shop/product-details", {
 					title: "My Details Product",
@@ -52,14 +49,15 @@ class ShopController {
 	};
 
 	// [GET] /cart
-	getCart = (req, res, next) => {
+	getCart = async (req, res, next) => {
 		const user = req.user;
-		user.getUserCart()
+
+		await user.populate('cart.items.productId')
 			.then((products) => {
 				res.render("shop/cart", {
 					title: "My Cart",
 					text: "This is my Cart",
-					products,
+					products: products.cart.items,
 					total: 0,
 					path: "/cart",
 				});
@@ -67,14 +65,30 @@ class ShopController {
 			.catch((err) => {
 				throw err;
 			});
+		// user.getUserCart()
+		// 	.then((products) => {
+		// 		console.log('Product in cart', products);
+		// 		res.render("shop/cart", {
+		// 			title: "My Cart",
+		// 			text: "This is my Cart",
+		// 			products,
+		// 			total: 0,
+		// 			path: "/cart",
+		// 		});
+		// 	})
+		// 	.catch((err) => {
+		// 		throw err;
+		// 	});
 	};
 
 	// [POST] /cart
 	postCart = (req, res, next) => {
 		const id = req.body.id;
 		const user = req.user;
-		Product.fetchProductById(id)
+		Product.findById(id)
+			.populate('userId','name')
 			.then((product) => {
+				console.log('user name: ',product.userId.name);
 				return user.addToCart(product);
 			})
 			.then((result) => {
@@ -90,9 +104,9 @@ class ShopController {
 			.then((product) => {
 				// Cart.deleteProduct(id, product.price);
 				return req.user
-						.deleteCartProduct(id)
-						.then(() => res.redirect("/cart"))
-						.catch(err=> console.error(err));
+					.deleteCartProduct(id)
+					.then(() => res.redirect("/cart"))
+					.catch((err) => console.error(err));
 			})
 			.catch((error) => {
 				throw error;
@@ -100,8 +114,9 @@ class ShopController {
 	};
 
 	getOrder = (req, res, next) => {
-		req.user.getUserOrder()
-			.then((orders) =>{	
+		req.user
+			.getUserOrder()
+			.then((orders) => {
 				res.render("shop/order", {
 					title: "My Order",
 					text: "This is the Order from:",
@@ -109,15 +124,15 @@ class ShopController {
 					path: "/order",
 				});
 			})
-			.catch(err=> console.error(err));
+			.catch((err) => console.error(err));
 	};
 
-	addOrder = (req, res, next)=>{
-		req.user.addOrder()
+	addOrder = (req, res, next) => {
+		req.user
+			.addOrder()
 			.then(() => res.redirect("/order"))
-			.catch(err=> console.error(err));
-
-	}
+			.catch((err) => console.error(err));
+	};
 
 	getCheckout = (req, res, next) => {
 		res.render("shop/checkout", {
