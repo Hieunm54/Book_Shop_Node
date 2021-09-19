@@ -1,5 +1,7 @@
+import { ObjectId } from "bson";
 import mongoose from "mongoose";
-import Product from "../models/product.js";
+import Product from "./product.js";
+import Order from "./order.js";
 
 const { Schema } = mongoose;
 
@@ -78,16 +80,18 @@ userSchema.methods.getUserCart = async function () {
 	}
 };
 
-userSchema.methods.deleteCartProduct = function(id) {
+userSchema.methods.deleteCartProduct = function (id) {
 	//todo ktra quantity cua thang do so vs 1.
-	const productIndex = this.cart.items.findIndex(item => item.productId.toString() === id.toString());
-	
+	const productIndex = this.cart.items.findIndex(
+		(item) => item.productId.toString() === id.toString()
+	);
+
 	let cartItems = [...this.cart.items];
 
 	//todo if quantity >1
-	if( cartItems[productIndex].quantity > 1 ){
-		cartItems[productIndex].quantity--;	
-	} else{
+	if (cartItems[productIndex].quantity > 1) {
+		cartItems[productIndex].quantity--;
+	} else {
 		//todo else
 		cartItems = this.cart.items.filter((i) => {
 			return i.productId.toString() !== id.toString();
@@ -96,6 +100,42 @@ userSchema.methods.deleteCartProduct = function(id) {
 
 	this.cart.items = cartItems;
 	return this.save();
+};
+
+userSchema.methods.addOrder = function () {
+	return this.getUserCart()
+		.then((orderItems) => {
+			const productList = orderItems.map((item) => {
+				const productId = item._id;
+				const title = item.title;
+				const price = item.price;
+				const quantity = item.quantity;
+				return { productId, title, price, quantity };
+			});
+
+			const userOrder = new Order({
+				productList: productList,
+				user: {
+					userId: ObjectId(this._id),
+					name: this.name,
+				},
+			});
+			return userOrder.save();
+			// return db.collection("orders").insertOne(order);
+		})
+		.then(() => {
+			this.cart = { items: [] };
+			return this.save();
+		});
+};
+
+userSchema.methods.getUserOrder = async function () {
+	try {
+		const result = await Order.find({ "user.userId": this._id });
+		return result;
+	} catch (err) {
+		return console.error(err);
+	}
 };
 
 export default mongoose.model("User", userSchema);

@@ -55,6 +55,7 @@ class ShopController {
 		await user
 			.populate("cart.items.productId")
 			.then((products) => {
+				// console.log('get cart: ', products.cart.items);
 				res.render("shop/cart", {
 					title: "My Cart",
 					text: "This is my Cart",
@@ -121,13 +122,13 @@ class ShopController {
 	};
 
 	getOrder = (req, res, next) => {
-		req.user
-			.getUserOrder()
+		req.user.getUserOrder()
 			.then((orders) => {
+					console.log('orders ', orders )
 				res.render("shop/order", {
 					title: "My Order",
 					text: "This is the Order from:",
-					orders,
+					orders: orders,
 					path: "/order",
 				});
 			})
