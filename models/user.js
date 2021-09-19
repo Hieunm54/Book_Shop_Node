@@ -56,13 +56,15 @@ userSchema.methods.addToCart = function (product) {
 	// 	.updateOne({ _id: this._id }, { $set: { cart: updatedProduct } });
 };
 
-userSchema.methods.getUserCart = async function() {
+userSchema.methods.getUserCart = async function () {
 	const cartItemId = this.cart.items.map((item) => {
 		return item.productId;
 	});
 
 	try {
-		const products = await Product.find({ _id: { $in: cartItemId } }).lean();
+		const products = await Product.find({
+			_id: { $in: cartItemId },
+		}).lean();
 		return products.map((p) => {
 			return {
 				...p,
@@ -74,6 +76,26 @@ userSchema.methods.getUserCart = async function() {
 	} catch (err) {
 		return console.error(err);
 	}
+};
+
+userSchema.methods.deleteCartProduct = function(id) {
+	//todo ktra quantity cua thang do so vs 1.
+	const productIndex = this.cart.items.findIndex(item => item.productId.toString() === id.toString());
+	
+	let cartItems = [...this.cart.items];
+
+	//todo if quantity >1
+	if( cartItems[productIndex].quantity > 1 ){
+		cartItems[productIndex].quantity--;	
+	} else{
+		//todo else
+		cartItems = this.cart.items.filter((i) => {
+			return i.productId.toString() !== id.toString();
+		});
+	}
+
+	this.cart.items = cartItems;
+	return this.save();
 };
 
 export default mongoose.model("User", userSchema);

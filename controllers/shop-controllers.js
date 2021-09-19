@@ -52,7 +52,8 @@ class ShopController {
 	getCart = async (req, res, next) => {
 		const user = req.user;
 
-		await user.populate('cart.items.productId')
+		await user
+			.populate("cart.items.productId")
 			.then((products) => {
 				res.render("shop/cart", {
 					title: "My Cart",
@@ -86,9 +87,9 @@ class ShopController {
 		const id = req.body.id;
 		const user = req.user;
 		Product.findById(id)
-			.populate('userId','name')
+			.populate("userId", "name")
 			.then((product) => {
-				console.log('user name: ',product.userId.name);
+				console.log("user name: ", product.userId.name);
 				return user.addToCart(product);
 			})
 			.then((result) => {
@@ -100,17 +101,23 @@ class ShopController {
 	// [DELETE] /cart/delete-product
 	deleteCartProduct = (req, res) => {
 		const id = req.body.id;
-		Product.fetchProductById(id)
-			.then((product) => {
-				// Cart.deleteProduct(id, product.price);
-				return req.user
-					.deleteCartProduct(id)
-					.then(() => res.redirect("/cart"))
-					.catch((err) => console.error(err));
-			})
-			.catch((error) => {
-				throw error;
-			});
+
+		req.user
+			.deleteCartProduct(id)
+			.then(() => res.redirect("/cart"))
+			.catch((err) => console.error(err));
+
+		// Product.fetchProductById(id)
+		// 	.then((product) => {
+		// 		// Cart.deleteProduct(id, product.price);
+		// 		return req.user
+		// 			.deleteCartProduct(id)
+		// 			.then(() => res.redirect("/cart"))
+		// 			.catch((err) => console.error(err));
+		// 	})
+		// 	.catch((error) => {
+		// 		throw error;
+		// 	});
 	};
 
 	getOrder = (req, res, next) => {
