@@ -124,7 +124,6 @@ class ShopController {
 	getOrder = (req, res, next) => {
 		req.user.getUserOrder()
 			.then((orders) => {
-					console.log('orders ', orders )
 				res.render("shop/order", {
 					title: "My Order",
 					text: "This is the Order from:",

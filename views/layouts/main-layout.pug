@@ -19,14 +19,20 @@ html(lang="en")
                         a(href="/cart", class=(path==="/cart" ? "active" : "")) Cart
                     li.active.main-header__item
                         a(href="/order", class=(path==="/order" ? "active" : "")) Order
+                    if authenticated
+                        li.active.main-header__item
+                            a(href="/admin/add-product", class=(path==='/admin/add-product' ? 'active' : '')) Add Product
+                        li.active.main-header__item
+                            a(href="/admin/products", class=(path==="/admin/products" ? "active" : "")) Admin Products
+                        li.active.main-header__item
+
+                    //-     a(href="/admin/users", class=(path==="admin/users" ? "active" : "")) All Users
+                    //- li.active.main-header__item
+                    //-     a(href="/admin/add-user", class=(path==="admin/add-user" ? "active" : "")) Add User
+                ul.main-header__item-list
                     li.active.main-header__item
-                        a(href="/admin/add-product", class=(path==='/admin/add-product' ? 'active' : '')) Add Product
-                    li.active.main-header__item
-                        a(href="/admin/products", class=(path==="/admin/products" ? "active" : "")) Admin Products
-                    li.active.main-header__item
-                        a(href="/admin/users", class=(path==="admin/users" ? "active" : "")) All Users
-                    li.active.main-header__item
-                        a(href="/admin/add-user", class=(path==="admin/add-user" ? "active" : "")) Add User
+                        a(href="/login", class=(path==="/login" ? "active" : "")) Login
+
                     
 
         block content

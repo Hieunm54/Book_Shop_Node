@@ -3,17 +3,22 @@ import path from "path";
 import methodOverride from "method-override";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-
-dotenv.config();
+import session from 'express-session';
+import mongoDBSession from 'connect-mongodb-session';
 
 import adminRouter from "./router/admin-route.js";
 import productRouter from "./router/shop-route.js";
+import authRouter from "./router/auth-route.js";
 
 import ErrorHandler from "./controllers/error-controllers.js";
 const errorHandler = new ErrorHandler();
 
-// import mongoConnect from "./util/database.js";
+const MongoDBStore = mongoDBSession(session);
+dotenv.config();
 
+let uri = process.env.MONGODB_URI;
+
+// import mongoConnect from "./util/database.js";
 import User from "./models/user.js";
 
 const __dirname = path.resolve();
@@ -22,7 +27,31 @@ const app = express();
 app.set("views", "./views/pug"); // show where the template files are located
 app.set("view engine", "pug"); // set the engine to use
 
+//connect to db to store session
+const store = new MongoDBStore({
+	uri: uri,
+	collection: 'sessions'
+}, function(err, db) { //handle error when connect to db- store session
+	console.log(err)
+})
+
+store.on('error', function(err){
+	console.log(err);
+})
+
+
+// config session
+app.use(session({
+	secret: process.env.SESSION_STORE_PASSWORD,
+	resave: false,
+	saveUninitialized: false,
+	store: store
+}))
+
+// serve static file
 app.use(express.static(path.join(__dirname, "public")));
+
+// serve body in res
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -41,12 +70,13 @@ app.use((req, res, next) => {
 		});
 });
 
+// register router
 app.use("/admin", adminRouter);
 app.use(productRouter);
+app.use(authRouter);
 
 app.use(errorHandler.notFoundPage);
 
-let uri = process.env.MONGODB_URI;
 
 mongoose.connect(uri)
         .then(() => {
