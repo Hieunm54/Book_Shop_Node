@@ -59,16 +59,34 @@ app.use(express.urlencoded({ extended: true }));
 //* override with POST having ?_method= PUT/DELETE
 app.use(methodOverride("_method"));
 
-app.use((req, res, next) => {
-	User.findById("61459f3c7e97d87531157435")
+// app.use((req, res, next) => {
+// 	if( req.session.isLoggedIn){
+// 		req.session.user = new User().init(req.session.user);
+// 	}
+// 	next();
+// 	// User.findById("61459f3c7e97d87531157435")
+// 	// 	.then((user) => {
+// 	// 		req.user = user
+// 	// 		next();
+// 	// 	})
+// 	// 	.catch((err) => {
+// 	// 		console.log("Error");
+// 	// 	});
+// });
+
+app.use((req,res, next)=>{
+	if( !req.session.user){
+		return next();
+	}
+	User.findById(req.session.user._id)
 		.then((user) => {
 			req.user = user
 			next();
 		})
 		.catch((err) => {
-			console.log("Error");
+			console.log(err);
 		});
-});
+})
 
 // register router
 app.use("/admin", adminRouter);
