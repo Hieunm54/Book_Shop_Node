@@ -1,7 +1,9 @@
 import Product from "../models/product.js";
 
 const notLoginRedirect = (user, res) => {
-	if (!user) res.redirect("/login");
+	if (!user) {
+		return res.redirect("/login");
+	}
 };
 
 class ShopController {
@@ -115,7 +117,7 @@ class ShopController {
 	deleteCartProduct = (req, res) => {
 		const id = req.body.id;
 		//if user is not login => redirect to login page
-		notLoginRedirect(req.user,res);
+		notLoginRedirect(req.user, res);
 		req.user
 			.deleteCartProduct(id)
 			.then(() => res.redirect("/cart"))
@@ -124,7 +126,7 @@ class ShopController {
 
 	getOrder = (req, res, next) => {
 		//if user is not login => redirect to login page
-		notLoginRedirect(req.user,res);
+		notLoginRedirect(req.user, res);
 		req.user
 			.getUserOrder()
 			.then((orders) => {
@@ -141,7 +143,7 @@ class ShopController {
 
 	addOrder = (req, res, next) => {
 		//if user is not login => redirect to login page
-		notLoginRedirect(req.user,res);
+		notLoginRedirect(req.user, res);
 		req.user
 			.addOrder()
 			.then(() => res.redirect("/order"))

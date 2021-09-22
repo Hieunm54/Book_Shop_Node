@@ -33,7 +33,11 @@ html(lang="en")
                     if !authenticated
                         li.active.main-header__item
                             a(href="/login", class=(path==="/login" ? "active" : "")) Login
+                        li.active.main-header__item
+                            a(href="/signup", class=(path==="/signup" ? "active" : "")) Signup
                     else
+                        li.active.main-header__item
+                            button.active.main-header__item(type="button") #{user_name}
                         li.active.main-header__item
                             form(action="/logout" method="post")
                                 button.active.main-header__item(type="submit") Logout
