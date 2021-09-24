@@ -21,4 +21,5 @@ block content
                 label(for="description") description
                 textarea#description(type="text" name="description" rows="5") #{product.description}
                 input(type="hidden" name='id' value=`${product._id}`)
+            input(type="hidden" name='_csrf' value=`${csrfToken}`)
             button.btn(type="submit") Update

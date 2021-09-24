@@ -121,7 +121,7 @@ userSchema.methods.addOrder = function () {
 				productList: productList,
 				user: {
 					userId: ObjectId(this._id),
-					name: this.name,
+					email: this.email,
 				},
 			});
 			return userOrder.save();

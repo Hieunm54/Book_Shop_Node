@@ -5,10 +5,14 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import session from "express-session";
 import mongoDBSession from "connect-mongodb-session";
+import csrf from 'csurf';
+import flash from 'connect-flash'
 
 import adminRouter from "./router/admin-route.js";
 import productRouter from "./router/shop-route.js";
 import authRouter from "./router/auth-route.js";
+
+import User from "./models/user.js";
 
 import ErrorHandler from "./controllers/error-controllers.js";
 const errorHandler = new ErrorHandler();
@@ -18,8 +22,7 @@ dotenv.config();
 
 let uri = process.env.MONGODB_URI;
 
-// import mongoConnect from "./util/database.js";
-import User from "./models/user.js";
+let csrfProtection = csrf();
 
 const __dirname = path.resolve();
 
@@ -64,20 +67,6 @@ app.use(express.urlencoded({ extended: true }));
 //* override with POST having ?_method= PUT/DELETE
 app.use(methodOverride("_method"));
 
-// app.use((req, res, next) => {
-// 	if( req.session.isLoggedIn){
-// 		req.session.user = new User().init(req.session.user);
-// 	}
-// 	next();
-// 	// User.findById("61459f3c7e97d87531157435")
-// 	// 	.then((user) => {
-// 	// 		req.user = user
-// 	// 		next();
-// 	// 	})
-// 	// 	.catch((err) => {
-// 	// 		console.log("Error");
-// 	// 	});
-// });
 
 app.use((req, res, next) => {
 	if (!req.session.user) {
@@ -93,6 +82,20 @@ app.use((req, res, next) => {
 			console.log(err);
 		});
 });
+
+// use flash message
+app.use(flash());
+
+
+// use csrf protection
+app.use(csrfProtection);
+
+// register csftToken to locals variables in res
+app.use((req, res, next) => {
+	res.locals.isAuthenticated = req.session.isLoggedIn;
+	res.locals.csrfToken = req.csrfToken(); 
+	next();
+})
 
 app.use((req, res, next) => {
 	res.locals.isAuthenticated = req.session.isLoggedIn;

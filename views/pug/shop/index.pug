@@ -21,7 +21,8 @@ block content
                             p.product__description= product.description
                             
                         .card__actions
-                            form(action="/cart" method="POST") 
+                            form(action="/cart" method="POST")
+                                input(type="hidden" name='_csrf' value=`${csrfToken}`)
                                 button.btn Add to Cart
                                 input(type="hidden" name='id' value=`${product._id}` )
         else 

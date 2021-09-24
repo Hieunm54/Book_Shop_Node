@@ -1,10 +1,5 @@
 import Product from "../models/product.js";
 
-const notLoginRedirect = (user, res) => {
-	if (!user) {
-		return res.redirect("/login");
-	}
-};
 
 class ShopController {
 	// [GET] /
@@ -16,7 +11,7 @@ class ShopController {
 					text: "Welcome to our shop",
 					products: products,
 					path: "/",
-					authenticated: req.session.isLoggedIn,
+					// authenticated: req.session.isLoggedIn,
 				});
 			})
 			.catch((err) => {
@@ -32,7 +27,7 @@ class ShopController {
 					title: "All Products",
 					products: products,
 					path: "/products",
-					authenticated: req.session.isLoggedIn,
+					// authenticated: req.session.isLoggedIn,
 				});
 			})
 			.catch((err) => {
@@ -49,7 +44,7 @@ class ShopController {
 					title: "My Details Product",
 					product,
 					path: "/products",
-					authenticated: req.session.isLoggedIn,
+					// authenticated: req.session.isLoggedIn,
 				});
 			})
 			.catch((err) => {
@@ -61,7 +56,6 @@ class ShopController {
 	getCart = async (req, res, next) => {
 		const user = req.user;
 		//if user is not login => redirect to login page
-		notLoginRedirect(user, res);
 		await user
 			.populate("cart.items.productId")
 			.then((products) => {
@@ -72,7 +66,7 @@ class ShopController {
 					products: products.cart.items,
 					total: 0,
 					path: "/cart",
-					authenticated: req.session.isLoggedIn,
+					// authenticated: req.session.isLoggedIn,
 				});
 			})
 			.catch((err) => {
@@ -100,7 +94,6 @@ class ShopController {
 		const id = req.body.id;
 		const user = req.user;
 		//if user is not login => redirect to login page
-		notLoginRedirect(user, res);
 		Product.findById(id)
 			.populate("userId", "name")
 			.then((product) => {
@@ -117,7 +110,6 @@ class ShopController {
 	deleteCartProduct = (req, res) => {
 		const id = req.body.id;
 		//if user is not login => redirect to login page
-		notLoginRedirect(req.user, res);
 		req.user
 			.deleteCartProduct(id)
 			.then(() => res.redirect("/cart"))
@@ -126,7 +118,6 @@ class ShopController {
 
 	getOrder = (req, res, next) => {
 		//if user is not login => redirect to login page
-		notLoginRedirect(req.user, res);
 		req.user
 			.getUserOrder()
 			.then((orders) => {
@@ -135,7 +126,7 @@ class ShopController {
 					text: "This is the Order from:",
 					orders: orders,
 					path: "/order",
-					authenticated: req.session.isLoggedIn,
+					// authenticated: req.session.isLoggedIn,
 				});
 			})
 			.catch((err) => console.error(err));
@@ -143,7 +134,6 @@ class ShopController {
 
 	addOrder = (req, res, next) => {
 		//if user is not login => redirect to login page
-		notLoginRedirect(req.user, res);
 		req.user
 			.addOrder()
 			.then(() => res.redirect("/order"))
@@ -155,7 +145,7 @@ class ShopController {
 			title: "My Checkout",
 			text: "This is my Checkout",
 			path: "/checkout",
-			authenticated: req.session.isLoggedIn,
+			// authenticated: req.session.isLoggedIn,
 		});
 	};
 }

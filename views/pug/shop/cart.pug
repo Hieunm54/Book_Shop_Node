@@ -12,12 +12,14 @@ block content
                         li.cart__item 
                             h1.cart__item-title #{p.productId.title} 
                             h2.cart__item-quantity= `Quantity: ${p.quantity}`
-                            form(action="/cart/delete-product?_method=DELETE" method="POST") 
+                            form(action="/cart/delete-product?_method=DELETE" method="POST")
+                                input(type="hidden" name='_csrf' value=`${csrfToken}`)
                                 button.btn.danger Delete
                                 input(type="hidden" name='id' value=`${p.productId._id}` )
                 hr
                 .centered
-                    form(action="/create-order" method="POST") 
+                    form(action="/create-order" method="POST")
+                        input(type="hidden" name='_csrf' value=`${csrfToken}`)
                         button.btn Order Now!
         
                 //- h2= `Total price: ${total}`

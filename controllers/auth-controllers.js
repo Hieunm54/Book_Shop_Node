@@ -8,10 +8,24 @@ const sandRounds = 10;
 class AuthController {
 	//[GET] /login
 	getLogin = (req, res) => {
+		let errMessage = req.flash('error');
+		if( errMessage.length <= 0){
+			errMessage = null
+		}
+
+		let successMessage = req.flash('success');
+		if( successMessage.length <= 0){
+			successMessage = null
+		}
+		// console.log('successMessage',successMessage);
+
+		console.log('errMessage:',errMessage);
 		res.render("auth/login", {
 			title: "Login",
 			path: "/login",
-			authenticated: req.session.isLoggedIn,
+			errorMessage: errMessage,
+			successMessage
+			// authenticated: req.session.isLoggedIn,
 		});
 	};
 
@@ -32,7 +46,10 @@ class AuthController {
 							res.redirect("/");
 						});
 					} else {
-						return res.redirect("/login");
+						req.flash('error','Invalid user or password');
+						return req.session.save(err=>{
+							res.redirect("/login");
+						});
 					}
 				});
 			})
@@ -58,10 +75,22 @@ class AuthController {
 
 	// [GET] /signup
 	getSignup = (req, res) => {
+		let errMessage = req.flash('signupError');
+		if( errMessage.length <= 0){
+			errMessage = null
+		}
+
+		let successMessage = req.flash('success');
+		if( successMessage.length <= 0){
+			successMessage = null
+		}
+		console.log('successMessage',successMessage);
+
 		res.render("auth/signup", {
 			title: "Signup",
 			path: "/signup",
-			authenticated: req.session.isLoggedIn,
+			errMessage,
+			// authenticated: req.session.isLoggedIn,
 		});
 	};
 
@@ -72,6 +101,7 @@ class AuthController {
 		User.findOne({ email: email })
 			.then((user) => {
 				if (user) {
+					req.flash('signupError','Invalid gmail or password. Please try again.');
 					return res.redirect("/signup");
 				}
 				// encryp password
@@ -84,6 +114,7 @@ class AuthController {
 							password: hashPassword,
 							cart: { items: [] },
 						});
+						req.flash('success','Signup successful. Please login to continue');
 						return newUser.save();
 					})
 					.then(() => {

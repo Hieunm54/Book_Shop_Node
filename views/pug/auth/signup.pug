@@ -6,6 +6,10 @@ block styles
 
 block content 
     main
+        if errMessage
+            div.user-message.user-message--error #{errMessage}
+        
+
         form.login-form(action="/signup" method="POST")
             .form-control
                 label(for="name") Name
@@ -19,4 +23,5 @@ block content
             .form-control
                 label(for="cf_password") Confirm Password
                 input#password(type="password" name="cf_password")
+            input(type="hidden" name='_csrf' value=`${csrfToken}`)    
             button.btn(type="submit") Signup

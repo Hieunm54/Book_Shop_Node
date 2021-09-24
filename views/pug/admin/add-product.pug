@@ -20,4 +20,5 @@ block content
                 .form-control
                     label(for="description") description
                     textarea#description(type="text" name="description" rows="5")
+                input(type="hidden" name='_csrf' value=`${csrfToken}`)
                 button.btn(type="submit") Add Product

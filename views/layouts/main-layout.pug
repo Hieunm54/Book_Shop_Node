@@ -15,7 +15,7 @@ html(lang="en")
                         a(href="/", class=(path==="/" ? "active" : "")) Shop
                     li.active.main-header__item
                         a(href="/products", class=(path==="/products" ? "active" : "")) Products
-                    if authenticated
+                    if isAuthenticated
                         li.active.main-header__item
                             a(href="/cart", class=(path==="/cart" ? "active" : "")) Cart
                         li.active.main-header__item
@@ -30,7 +30,7 @@ html(lang="en")
                     //- li.active.main-header__item
                     //-     a(href="/admin/add-user", class=(path==="admin/add-user" ? "active" : "")) Add User
                 ul.main-header__item-list
-                    if !authenticated
+                    if !isAuthenticated
                         li.active.main-header__item
                             a(href="/login", class=(path==="/login" ? "active" : "")) Login
                         li.active.main-header__item
@@ -40,6 +40,7 @@ html(lang="en")
                             button.active.main-header__item(type="button") #{user_name}
                         li.active.main-header__item
                             form(action="/logout" method="post")
+                                input(type="hidden" name='_csrf' value=`${csrfToken}`)
                                 button.active.main-header__item(type="submit") Logout
                         //- a(href="/logout", class=(path==="/login" ? "active" : "")) Logout
 

@@ -7,7 +7,7 @@ class AdminController {
 		res.render("admin/add-product", {
 			title: "Shop",
 			path: "/admin/add-product",
-            authenticated: req.session.isLoggedIn,
+            // authenticated: req.session.isLoggedIn,
 			
 		});
 	};
@@ -21,7 +21,7 @@ class AdminController {
 					text: "Welcome to our shop",
 					products: products,
 					path: "/admin/products",
-					authenticated: req.session.isLoggedIn,
+					// authenticated: req.session.isLoggedIn,
 
 				});
 			})
@@ -39,7 +39,7 @@ class AdminController {
 			price: price,
 			description: description,
 			userId: req.user._id,
-			authenticated: req.session.isLoggedIn,
+			// authenticated: req.session.isLoggedIn,
 		});
 		product
 			.save()
@@ -65,7 +65,7 @@ class AdminController {
 					title: "Edit Page",
 					product,
 					path: "/admin/edit-product",
-					authenticated: req.session.isLoggedIn,
+					// authenticated: req.session.isLoggedIn,
 
 				});
 			})
@@ -129,7 +129,7 @@ class AdminController {
 					title: "Users",
 					users,
 					path: "/admin/users",
-					authenticated: req.session.isLoggedIn,
+					// authenticated: req.session.isLoggedIn,
 
 				});
 			})
@@ -141,7 +141,7 @@ class AdminController {
 	// [GET] /admin/add-users
 	getAddUser = (req, res, next) => {
 
-		res.render("user/add-user", { path: "admin/add-user", authenticated: req.session.isLoggedIn, });
+		res.render("user/add-user", { path: "admin/add-user", });
 	};
 
 	// [POST] /admin/add-users
