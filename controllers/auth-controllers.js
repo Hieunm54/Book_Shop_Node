@@ -1,7 +1,19 @@
 import bcrypt from "bcrypt";
+import nodemailer from 'nodemailer';
+import sgTransport from 'nodemailer-sendgrid-transport';
+import dotenv from 'dotenv'
 
 import User from "../models/user.js";
 
+//config dotenv
+dotenv.config();
+
+//create mailer
+let mailer = nodemailer.createTransport(sgTransport({
+	auth:{
+		api_key: process.env.SENDGRID_API_KEY
+	}
+}))
 // config bcrypt
 const sandRounds = 10;
 
@@ -114,11 +126,26 @@ class AuthController {
 							password: hashPassword,
 							cart: { items: [] },
 						});
-						req.flash('success','Signup successful. Please login to continue');
+						
 						return newUser.save();
 					})
 					.then(() => {
-						res.redirect("/login");
+						const verifyEmail = {
+							to: email,
+							from: process.env.SENDGRID_SENDER,
+							subject: 'Thank for your signup',
+							text: 'Welcome to our shop',
+							html: '<b>Hope you enjoy it</b>'
+						}
+						mailer.sendMail(verifyEmail,(err,result)=>{
+							if(err) {
+								console.log(err);
+								return;
+							}else{
+								req.flash('success','Signup successful. Please login to continue');
+								res.redirect("/login");
+							}
+						})
 					});
 			})
 			.catch((err) => console.log(err));
