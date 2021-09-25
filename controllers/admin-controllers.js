@@ -7,14 +7,13 @@ class AdminController {
 		res.render("admin/add-product", {
 			title: "Shop",
 			path: "/admin/add-product",
-            // authenticated: req.session.isLoggedIn,
-			
+			// authenticated: req.session.isLoggedIn,
 		});
 	};
 
 	// [GET] /admin/products
 	getAdminProduct = (req, res, next) => {
-		Product.find({})
+		Product.find({ userId: req.user._id })
 			.then((products) => {
 				res.render("admin/products", {
 					title: "My Shop",
@@ -22,7 +21,6 @@ class AdminController {
 					products: products,
 					path: "/admin/products",
 					// authenticated: req.session.isLoggedIn,
-
 				});
 			})
 			.catch((err) => {
@@ -66,7 +64,6 @@ class AdminController {
 					product,
 					path: "/admin/edit-product",
 					// authenticated: req.session.isLoggedIn,
-
 				});
 			})
 			.catch((err) => {
@@ -79,24 +76,42 @@ class AdminController {
 		const id = req.body.id;
 		const { title, imgUrl, price, description } = req.body;
 
-		Product.findByIdAndUpdate(id,
-			{
-				// _id: id,
-				title: title,
-				imgUrl: imgUrl,
-				price: price,
-				description: description,
-			},
-			{
-				runValidators: true
-			}
-			,
-			()=>{
-				res.redirect("/admin/products");
+		Product.findById(id)
+			.then((product) => {
+				if (product.userId.toString() !== req.user._id.toString()) {
+					return res.redirect("/");
+				}
+				product.title = title;
+				product.price = price;
+				product.imgUrl = imgUrl;
+				product.description = description;
+				console.log("product 2", product);
 
-			}
-		)
-		
+				return product.save().then(() => {
+					res.redirect("/admin/products");
+				});
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+
+		// Product.findByIdAndUpdate(
+		// 	id,
+		// 	{
+		// 		// _id: id,
+		// 		title: title,
+		// 		imgUrl: imgUrl,
+		// 		price: price,
+		// 		description: description,
+		// 	},
+		// 	{
+		// 		runValidators: true,
+		// 	},
+		// 	() => {
+		// 		res.redirect("/admin/products");
+		// 	}
+		// );
+
 		// (
 		// 	id,
 		// 	{
@@ -116,9 +131,15 @@ class AdminController {
 	deleteProduct = (req, res, next) => {
 		const id = req.body.id;
 		// Cart.deleteProduct(id);
-		Product.findByIdAndDelete(id, () => {
-			res.redirect("/admin/products");
-		});
+		Product.findOne({ _id: id, userId: req.user._id })
+			.then(()=>{
+
+				res.redirect("/admin/products");
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		
 	};
 
 	// [GET] /admin/users/
@@ -130,7 +151,6 @@ class AdminController {
 					users,
 					path: "/admin/users",
 					// authenticated: req.session.isLoggedIn,
-
 				});
 			})
 			.catch((err) => {
@@ -140,8 +160,7 @@ class AdminController {
 
 	// [GET] /admin/add-users
 	getAddUser = (req, res, next) => {
-
-		res.render("user/add-user", { path: "admin/add-user", });
+		res.render("user/add-user", { path: "admin/add-user" });
 	};
 
 	// [POST] /admin/add-users
