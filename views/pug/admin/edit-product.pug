@@ -6,6 +6,8 @@ block styles
 
 block content 
     main
+        if errorValidation
+            div.user-message.user-message--error #{errorValidation}
         h1 Edit Page
         form.product-form(action="/admin/edit-product?_method=PUT" method="POST")
             .form-control

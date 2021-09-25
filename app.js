@@ -94,16 +94,16 @@ app.use(csrfProtection);
 app.use((req, res, next) => {
 	res.locals.isAuthenticated = req.session.isLoggedIn;
 	res.locals.csrfToken = req.csrfToken(); 
-	next();
-})
-
-app.use((req, res, next) => {
-	res.locals.isAuthenticated = req.session.isLoggedIn;
 	res.locals.user_name = req.session.isLoggedIn
 		? req.session.user.name
 		: "Guest";
+	res.locals.oldInput = function(name){
+		return req.body[name];
+	}
+	
 	next();
-});
+})
+
 
 // register router
 app.use("/admin", adminRouter);

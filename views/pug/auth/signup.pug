@@ -10,18 +10,18 @@ block content
             div.user-message.user-message--error #{errMessage}
         
 
-        form.login-form(action="/signup" method="POST")
+        form.login-form(action="/signup" method="POST" novalidate)
             .form-control
                 label(for="name") Name
-                input#name(type="text" name="name")
+                input#name(type="text" name="name" value=oldInput('name'))
             .form-control
                 label(for="email") E-mail
-                input#email(type="email" name="email")
+                input#email(type="email" name="email" value=oldInput('email'))
             .form-control
                 label(for="password") Password
-                input#password(type="password" name="password")
+                input#password(type="password" name="password" value=oldInput('password'))
             .form-control
                 label(for="cf_password") Confirm Password
-                input#password(type="password" name="cf_password")
+                input#password(type="password" name="cf_password" value=oldInput('cf_password'))
             input(type="hidden" name='_csrf' value=`${csrfToken}`)    
             button.btn(type="submit") Signup

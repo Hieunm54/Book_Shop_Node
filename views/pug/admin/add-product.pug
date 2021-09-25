@@ -6,18 +6,20 @@ block styles
 
 block content 
     main
-            form.product-form(action="/admin/add-product" method="POST")
-                .form-control
-                    label(for="title") Title
-                    input#title(type="text" name="title")
-                .form-control
-                    label(for="imgUrl") Image URL
-                    input#imgUrl(type="text" name="imgUrl")
-                .form-control
-                    label(for="price") Price 
-                    input#price(type="number" name="price" step=0.01)
-                .form-control
-                    label(for="description") description
-                    textarea#description(type="text" name="description" rows="5")
-                input(type="hidden" name='_csrf' value=`${csrfToken}`)
-                button.btn(type="submit") Add Product
+        if errorValidation
+            div.user-message.user-message--error #{errorValidation}
+        form.product-form(action="/admin/add-product" method="POST")
+            .form-control
+                label(for="title") Title
+                input#title(type="text" name="title" value=oldInput('title'))
+            .form-control
+                label(for="imgUrl") Image URL
+                input#imgUrl(type="text" name="imgUrl" value=oldInput('imgUrl')  )
+            .form-control
+                label(for="price") Price 
+                input#price(type="number" name="price" step=0.01 value=oldInput('price'))
+            .form-control
+                label(for="description") description
+                textarea#description(type="text" name="description" rows="5" ) #{oldInput('description')}
+            input(type="hidden" name='_csrf' value=`${csrfToken}`)
+            button.btn(type="submit") Add Product

@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import sgTransport from "nodemailer-sendgrid-transport";
+import { validationResult } from "express-validator";
 import dotenv from "dotenv";
 
 import User from "../models/user.js";
@@ -51,11 +52,28 @@ class AuthController {
 	postLogin = (req, res, next) => {
 		// res.cookie('isLoggedIn', true);
 		const { email, password } = req.body;
+		const errors = validationResult(req);
+		console.log('err mapped: ',errors.mapped());
+		if(!errors.isEmpty()){
+			return res.status(422).render("auth/login", {
+				title: "Login",
+				path: "/login",
+				errorMessage: errors.array()[0].msg,
+				validationErrors: errors.mapped()
+				// authenticated: req.session.isLoggedIn,
+			});
+		}
 		User.findOne({ email: email })
 			.then((user) => {
 				if (!user) {
-					return res.redirect("/login");
-				}
+					return res.status(422).render("auth/login", {
+						title: "Login",
+						path: "/login",
+						errorMessage: 'Invalid username or password',
+						validationErrors: errors.mapped(),
+				})
+			}
+
 				bcrypt.compare(password, user.password).then((result) => {
 					if (result == true) {
 						req.session.user = user;
@@ -64,10 +82,17 @@ class AuthController {
 							res.redirect("/");
 						});
 					} else {
-						req.flash("error", "Invalid user or password");
-						return req.session.save((err) => {
-							res.redirect("/login");
+						return res.status(422).render("auth/login", {
+							title: "Login",
+							path: "/login",
+							errorMessage: 'Invalid username or password',
+							validationErrors: errors.mapped()
+							// authenticated: req.session.isLoggedIn,
 						});
+						// req.flash("error", "Invalid user or password");
+						// return req.session.save((err) => {
+						// 	res.redirect("/login");
+						// });
 					}
 				});
 			})
@@ -100,13 +125,13 @@ class AuthController {
 			errMessage = errMessage[0];
 		}
 
-		let successMessage = req.flash("success");
-		if (successMessage.length <= 0) {
-			successMessage = null;
-		} else {
-			successMessage = successMessage[0];
-		}
-		console.log("successMessage", successMessage);
+		// let successMessage = req.flash("success");
+		// if (successMessage.length <= 0) {
+		// 	successMessage = null;
+		// } else {
+		// 	successMessage = successMessage[0];
+		// }
+		// console.log("successMessage", successMessage);
 
 		res.render("auth/signup", {
 			title: "Signup",
@@ -120,49 +145,51 @@ class AuthController {
 	postSignup = (req, res, next) => {
 		const { name, email, password, cf_password } = req.body;
 		// console.log(name, email, password, cf_password);
-		User.findOne({ email: email })
-			.then((user) => {
-				if (user) {
-					req.flash(
-						"error",
-						"Invalid gmail or password. Please try again."
-					);
-					return res.redirect("/signup");
-				}
-				// encryp password
-				return bcrypt
-					.hash(password, sandRounds)
-					.then((hashPassword) => {
-						const newUser = new User({
-							name,
-							email,
-							password: hashPassword,
-							cart: { items: [] },
-						});
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			console.log("errors: ", errors.array());
 
-						return newUser.save();
-					})
-					.then(() => {
-						const verifyEmail = {
-							to: email,
-							from: process.env.SENDGRID_SENDER,
-							subject: "Thank for your signup",
-							text: "Welcome to our shop",
-							html: "<b>Hope you enjoy it</b>",
-						};
-						mailer.sendMail(verifyEmail, (err, result) => {
-							if (err) {
-								console.log(err);
-								return;
-							} else {
-								req.flash(
-									"success",
-									"Signup successful. Please login to continue"
-								);
-								res.redirect("/login");
-							}
-						});
-					});
+			return res.status(422).render("auth/signup", {
+				title: "Signup",
+				path: "/signup",
+				errMessage: errors.array()[0].msg,
+				// authenticated: req.session.isLoggedIn,
+			});
+		}
+
+		// encryp password
+		bcrypt
+			.hash(password, sandRounds)
+			.then((hashPassword) => {
+				const newUser = new User({
+					name,
+					email,
+					password: hashPassword,
+					cart: { items: [] },
+				});
+
+				return newUser.save();
+			})
+			.then(() => {
+				const verifyEmail = {
+					to: email,
+					from: process.env.SENDGRID_SENDER,
+					subject: "Thank for your signup",
+					text: "Welcome to our shop",
+					html: "<b>Hope you enjoy it</b>",
+				};
+				mailer.sendMail(verifyEmail, (err, result) => {
+					if (err) {
+						console.log(err);
+						return;
+					} else {
+						req.flash(
+							"success",
+							"Signup successful. Please login to continue"
+						);
+						res.redirect("/login");
+					}
+				});
 			})
 			.catch((err) => console.log(err));
 	};
@@ -284,15 +311,17 @@ class AuthController {
 				}
 
 				resetUser = user;
-				return bcrypt.hash(newPassword, 10).then((hashPassword) => {
-					resetUser.password = hashPassword;
-					resetUser.resetToken = null;
-					resetUser.resetTokenExpriredDate = null;
-					return resetUser.save();
-				})
-				.then(()=>{
-					return res.redirect("/login");
-				});
+				return bcrypt
+					.hash(newPassword, 10)
+					.then((hashPassword) => {
+						resetUser.password = hashPassword;
+						resetUser.resetToken = null;
+						resetUser.resetTokenExpriredDate = null;
+						return resetUser.save();
+					})
+					.then(() => {
+						return res.redirect("/login");
+					});
 			})
 			.catch();
 	};

@@ -1,15 +1,8 @@
 import Product from "../models/product.js";
+import {validationResult} from 'express-validator';
 // import User from "../models/user.js"
 
 class AdminController {
-	// [GET] /admin/add-product
-	getAddProduct = (req, res, next) => {
-		res.render("admin/add-product", {
-			title: "Shop",
-			path: "/admin/add-product",
-			// authenticated: req.session.isLoggedIn,
-		});
-	};
 
 	// [GET] /admin/products
 	getAdminProduct = (req, res, next) => {
@@ -28,9 +21,30 @@ class AdminController {
 			});
 	};
 
+	// [GET] /admin/add-product
+	getAddProduct = (req, res, next) => {
+		res.render("admin/add-product", {
+			title: "Shop",
+			path: "/admin/add-product",
+			// authenticated: req.session.isLoggedIn,
+		});
+	};
+
+
 	// [POST ] /admin/add-product
 	postProduct = (req, res, next) => {
 		const { title, imgUrl, price, description } = req.body;
+
+		const errors = validationResult(req);
+		if( !errors.isEmpty()){
+			// console.log('error when add new product',errors)
+			return res.status(422).render("admin/add-product", {
+				title: "Shop",
+				path: "/admin/add-product",
+				errorValidation: errors.array()[0].msg
+			});
+		}
+
 		const product = new Product({
 			title: title,
 			imgUrl: imgUrl,
@@ -73,10 +87,22 @@ class AdminController {
 
 	// [PUT] /admin/edit-product
 	updateProduct = (req, res, next) => {
-		const id = req.body.id;
-		const { title, imgUrl, price, description } = req.body;
+		// const id = req.body.id;
+		const {id, title, imgUrl, price, description } = req.body;
 
-		Product.findById(id)
+		const errors = validationResult(req);
+		if( !errors.isEmpty()){
+			console.log('error when add new product',errors)
+			return res.status(422).render("admin/edit-product", {
+				title: "Edit Page",
+				product: { title, imgUrl, price, description,_id:id },
+				path: "/admin/edit-product",
+				errorValidation: errors.array()[0].msg
+				// authenticated: req.session.isLoggedIn,
+			});
+		}
+
+		Product.findById(req.body.id)
 			.then((product) => {
 				if (product.userId.toString() !== req.user._id.toString()) {
 					return res.redirect("/");
@@ -131,9 +157,8 @@ class AdminController {
 	deleteProduct = (req, res, next) => {
 		const id = req.body.id;
 		// Cart.deleteProduct(id);
-		Product.findOne({ _id: id, userId: req.user._id })
+		Product.deleteOne({ _id: id, userId: req.user._id })
 			.then(()=>{
-
 				res.redirect("/admin/products");
 			})
 			.catch((err) => {
