@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Product from "../models/product.js";
 import {validationResult} from 'express-validator';
 // import User from "../models/user.js"
@@ -17,7 +18,9 @@ class AdminController {
 				});
 			})
 			.catch((err) => {
-				console.log(err);
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
 			});
 	};
 
@@ -60,7 +63,11 @@ class AdminController {
 				res.redirect("/");
 			})
 			.catch((err) => {
-				console.log(err);
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
+
+				// console.log(err);
 			});
 	};
 
@@ -81,7 +88,9 @@ class AdminController {
 				});
 			})
 			.catch((err) => {
-				console.log(err);
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
 			});
 	};
 
@@ -92,7 +101,7 @@ class AdminController {
 
 		const errors = validationResult(req);
 		if( !errors.isEmpty()){
-			console.log('error when add new product',errors)
+			// console.log('error when add new product',errors)
 			return res.status(422).render("admin/edit-product", {
 				title: "Edit Page",
 				product: { title, imgUrl, price, description,_id:id },
@@ -118,7 +127,9 @@ class AdminController {
 				});
 			})
 			.catch((err) => {
-				console.log(err);
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
 			});
 
 		// Product.findByIdAndUpdate(
@@ -162,7 +173,9 @@ class AdminController {
 				res.redirect("/admin/products");
 			})
 			.catch((err) => {
-				console.log(err);
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
 			});
 		
 	};
@@ -179,7 +192,9 @@ class AdminController {
 				});
 			})
 			.catch((err) => {
-				throw err;
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
 			});
 	};
 
@@ -198,7 +213,9 @@ class AdminController {
 				res.redirect("/admin/users");
 			})
 			.catch((err) => {
-				console.log(err);
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
 			});
 	};
 }

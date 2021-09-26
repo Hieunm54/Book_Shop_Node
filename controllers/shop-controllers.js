@@ -15,7 +15,9 @@ class ShopController {
 				});
 			})
 			.catch((err) => {
-				console.log(err);
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
 			});
 	};
 
@@ -31,7 +33,9 @@ class ShopController {
 				});
 			})
 			.catch((err) => {
-				throw err;
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
 			});
 	};
 
@@ -48,7 +52,9 @@ class ShopController {
 				});
 			})
 			.catch((err) => {
-				throw err;
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
 			});
 	};
 
@@ -70,7 +76,9 @@ class ShopController {
 				});
 			})
 			.catch((err) => {
-				throw err;
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
 			});
 
 		// user.getUserCart()
@@ -113,7 +121,11 @@ class ShopController {
 		req.user
 			.deleteCartProduct(id)
 			.then(() => res.redirect("/cart"))
-			.catch((err) => console.error(err));
+			.catch((err) => {
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
+			});
 	};
 
 	getOrder = (req, res, next) => {
@@ -129,7 +141,11 @@ class ShopController {
 					// authenticated: req.session.isLoggedIn,
 				});
 			})
-			.catch((err) => console.error(err));
+			.catch((err) => {
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
+			});
 	};
 
 	addOrder = (req, res, next) => {
@@ -137,7 +153,11 @@ class ShopController {
 		req.user
 			.addOrder()
 			.then(() => res.redirect("/order"))
-			.catch((err) => console.error(err));
+			.catch((err) => {
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
+			});
 	};
 
 	getCheckout = (req, res, next) => {

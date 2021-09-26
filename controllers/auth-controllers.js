@@ -53,13 +53,13 @@ class AuthController {
 		// res.cookie('isLoggedIn', true);
 		const { email, password } = req.body;
 		const errors = validationResult(req);
-		console.log('err mapped: ',errors.mapped());
-		if(!errors.isEmpty()){
+		console.log("err mapped: ", errors.mapped());
+		if (!errors.isEmpty()) {
 			return res.status(422).render("auth/login", {
 				title: "Login",
 				path: "/login",
 				errorMessage: errors.array()[0].msg,
-				validationErrors: errors.mapped()
+				validationErrors: errors.mapped(),
 				// authenticated: req.session.isLoggedIn,
 			});
 		}
@@ -69,10 +69,10 @@ class AuthController {
 					return res.status(422).render("auth/login", {
 						title: "Login",
 						path: "/login",
-						errorMessage: 'Invalid username or password',
+						errorMessage: "Invalid username or password",
 						validationErrors: errors.mapped(),
-				})
-			}
+					});
+				}
 
 				bcrypt.compare(password, user.password).then((result) => {
 					if (result == true) {
@@ -85,28 +85,21 @@ class AuthController {
 						return res.status(422).render("auth/login", {
 							title: "Login",
 							path: "/login",
-							errorMessage: 'Invalid username or password',
-							validationErrors: errors.mapped()
+							errorMessage: "Invalid username or password",
+							validationErrors: errors.mapped(),
 							// authenticated: req.session.isLoggedIn,
 						});
-						// req.flash("error", "Invalid user or password");
-						// return req.session.save((err) => {
-						// 	res.redirect("/login");
-						// });
+					
 					}
 				});
 			})
-			.catch((err) => console.error(err));
+			.catch((err) => {
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
+			});
 
-		// User.findById("61459f3c7e97d87531157435")
-		// 	.then((user) => {
-		// 		req.session.user = user;
-		// 		req.session.isLoggedIn = true;
-		// 		req.session.save(() => res.redirect("/"));
-		// 	})
-		// 	.catch((err) => {
-		// 		console.log(err);
-		// 	});
+
 	};
 
 	// [POST] /logout
@@ -125,19 +118,10 @@ class AuthController {
 			errMessage = errMessage[0];
 		}
 
-		// let successMessage = req.flash("success");
-		// if (successMessage.length <= 0) {
-		// 	successMessage = null;
-		// } else {
-		// 	successMessage = successMessage[0];
-		// }
-		// console.log("successMessage", successMessage);
-
 		res.render("auth/signup", {
 			title: "Signup",
 			path: "/signup",
 			errMessage,
-			// authenticated: req.session.isLoggedIn,
 		});
 	};
 
@@ -153,7 +137,6 @@ class AuthController {
 				title: "Signup",
 				path: "/signup",
 				errMessage: errors.array()[0].msg,
-				// authenticated: req.session.isLoggedIn,
 			});
 		}
 
@@ -191,7 +174,11 @@ class AuthController {
 					}
 				});
 			})
-			.catch((err) => console.log(err));
+			.catch((err) => {
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
+			});
 	};
 
 	// [GET /reset
@@ -255,7 +242,9 @@ class AuthController {
 					});
 				})
 				.catch((err) => {
-					console.log(err);
+					const error = new Error(err);
+					error.httpStatusCode = 500;
+					return next(error);
 				});
 		});
 	};
@@ -281,7 +270,7 @@ class AuthController {
 					return res.redirect("/login");
 				}
 
-				res.render("auth/reset-password", {
+				return res.render("auth/reset-password", {
 					title: "Reset Password",
 					path: "/reset",
 					errMessage,
@@ -290,7 +279,9 @@ class AuthController {
 				});
 			})
 			.catch((err) => {
-				console.log(err);
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
 			});
 	};
 
@@ -323,7 +314,11 @@ class AuthController {
 						return res.redirect("/login");
 					});
 			})
-			.catch();
+			.catch((err) => {
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
+			});
 	};
 }
 

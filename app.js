@@ -68,21 +68,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
 
-app.use((req, res, next) => {
-	if (!req.session.user) {
-		return next();
-	}
-	User.findById(req.session.user._id)
-		.then((user) => {
-			req.user = user;
-
-			next();
-		})
-		.catch((err) => {
-			console.log(err);
-		});
-});
-
 // use flash message
 app.use(flash());
 
@@ -104,14 +89,39 @@ app.use((req, res, next) => {
 	next();
 })
 
+app.use((req, res, next) => {
+	if (!req.session.user) {
+		return next();
+	}
+	User.findById(req.session.user._id)
+		.then((user) => {
+			if(!user) {
+				return next();
+			}
+			req.user = user;
+			next();
+		})
+		.catch((err) => {
+			next(new Error(err));
+		});
+});
+
+
+
+
 
 // register router
 app.use("/admin", adminRouter);
 app.use(productRouter);
 app.use(authRouter);
 
+app.get('/500', errorHandler.get500ErrorPage);
 app.use(errorHandler.notFoundPage);
 
+// error handle middleware
+app.use((err,req,res, next)=>{
+	res.redirect('/500');
+})
 
 mongoose
 	.connect(uri)
