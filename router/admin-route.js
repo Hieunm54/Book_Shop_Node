@@ -15,7 +15,6 @@ router.post(
 	body("title", "No special character allowed in the title")
 		.trim()
 		.isString(),
-	body("imgUrl", "Please input a valid image url").isURL(),
 	body("price", "PLease input a valid number for price").isFloat(),
 	body(
 		"description",
@@ -33,7 +32,6 @@ router.put(
 	body("title", "No special character allowed in the title")
 		.trim()
 		.isString(),
-	body("imgUrl", "Please input a valid image url").isURL(),
 	body("price", "PLease input a valid number for price").isFloat(),
 	body(
 		"description",

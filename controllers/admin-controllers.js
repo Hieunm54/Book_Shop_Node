@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import Product from "../models/product.js";
 import {validationResult} from 'express-validator';
+
+import { deleteFile } from "../util/file.js";
+
 // import User from "../models/user.js"
 
 class AdminController {
@@ -36,8 +39,15 @@ class AdminController {
 
 	// [POST ] /admin/add-product
 	postProduct = (req, res, next) => {
-		const { title, imgUrl, price, description } = req.body;
-
+		const { title,price, description } = req.body;
+		const image = req.file;
+		if(!image){
+			return res.status(422).render("admin/add-product", {
+				title: "Shop",
+				path: "/admin/add-product",
+				errorValidation: 'Attach file is not an image'
+			});
+		}
 		const errors = validationResult(req);
 		if( !errors.isEmpty()){
 			// console.log('error when add new product',errors)
@@ -48,6 +58,9 @@ class AdminController {
 			});
 		}
 
+		const imgUrl = image.path;
+
+		// console.log('req.file: ',req.file);
 		const product = new Product({
 			title: title,
 			imgUrl: imgUrl,
@@ -60,9 +73,10 @@ class AdminController {
 			.save()
 			.then((result) => {
 				// console.log("product add: ", result);
-				res.redirect("/");
+				return res.redirect("/");
 			})
 			.catch((err) => {
+
 				const error = new Error(err);
 				error.httpStatusCode = 500;
 				return next(error);
@@ -97,14 +111,17 @@ class AdminController {
 	// [PUT] /admin/edit-product
 	updateProduct = (req, res, next) => {
 		// const id = req.body.id;
-		const {id, title, imgUrl, price, description } = req.body;
+		const {id, title, price, description } = req.body;
+		const image = req.file;
+		// console.log('image: ', image);
+
 
 		const errors = validationResult(req);
 		if( !errors.isEmpty()){
 			// console.log('error when add new product',errors)
 			return res.status(422).render("admin/edit-product", {
 				title: "Edit Page",
-				product: { title, imgUrl, price, description,_id:id },
+				product: { title, imgUrl: image.path, price, description,_id:id },
 				path: "/admin/edit-product",
 				errorValidation: errors.array()[0].msg
 				// authenticated: req.session.isLoggedIn,
@@ -118,9 +135,11 @@ class AdminController {
 				}
 				product.title = title;
 				product.price = price;
-				product.imgUrl = imgUrl;
+				if(image){
+					deleteFile(product.imgUrl);
+					product.imgUrl = image.path;
+				}
 				product.description = description;
-				console.log("product 2", product);
 
 				return product.save().then(() => {
 					res.redirect("/admin/products");
@@ -168,6 +187,8 @@ class AdminController {
 	deleteProduct = (req, res, next) => {
 		const id = req.body.id;
 		// Cart.deleteProduct(id);
+		const imgUrl = req.body.imgUrl;
+		deleteFile(imgUrl);
 		Product.deleteOne({ _id: id, userId: req.user._id })
 			.then(()=>{
 				res.redirect("/admin/products");

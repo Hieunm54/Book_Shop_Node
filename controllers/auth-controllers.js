@@ -53,7 +53,7 @@ class AuthController {
 		// res.cookie('isLoggedIn', true);
 		const { email, password } = req.body;
 		const errors = validationResult(req);
-		console.log("err mapped: ", errors.mapped());
+		// console.log("err mapped: ", errors.mapped());
 		if (!errors.isEmpty()) {
 			return res.status(422).render("auth/login", {
 				title: "Login",

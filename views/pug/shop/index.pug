@@ -25,6 +25,20 @@ block content
                                 input(type="hidden" name='_csrf' value=`${csrfToken}`)
                                 button.btn Add to Cart
                                 input(type="hidden" name='id' value=`${product._id}` )
+            section.pagination
+                //- - var num = 0;
+                //- while num < numberDocs
+                //-     - num++
+                //-     a(href=`/?page=${num}` class="active") #{num}
+                if currentPage !== 1 && prevPage !== 1
+                    a(href="?page=1") 1    
+                if hasPrevPage
+                    a(href=`?page=${currentPage - 1}`) #{prevPage}
+                a.active(href=`?page=${currentPage}`) #{currentPage}
+                if hasNextPage
+                    a(href=`?page=${currentPage + 1}`) #{nextPage}
+                if hasNextPage && nextPage !== lastPage
+                    a(href=`?page=${lastPage}`) #{lastPage}
         else 
             h2 No Products
 

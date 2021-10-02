@@ -8,13 +8,16 @@ block content
     main
         if errorValidation
             div.user-message.user-message--error #{errorValidation}
-        form.product-form(action="/admin/add-product" method="POST")
+        form.product-form(action="/admin/add-product" method="POST" enctype="multipart/form-data")
             .form-control
                 label(for="title") Title
                 input#title(type="text" name="title" value=oldInput('title'))
+            //- .form-control
+            //-     label(for="imgUrl") Image URL
+            //-     input#imgUrl(type="text" name="imgUrl" value=oldInput('imgUrl')  )
             .form-control
-                label(for="imgUrl") Image URL
-                input#imgUrl(type="text" name="imgUrl" value=oldInput('imgUrl')  )
+                label(for="img") Image
+                input#img(type="file" name="img" value=oldInput('img')  )
             .form-control
                 label(for="price") Price 
                 input#price(type="number" name="price" step=0.01 value=oldInput('price'))

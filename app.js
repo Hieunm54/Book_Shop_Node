@@ -5,8 +5,9 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import session from "express-session";
 import mongoDBSession from "connect-mongodb-session";
-import csrf from 'csurf';
-import flash from 'connect-flash'
+import csrf from "csurf";
+import flash from "connect-flash";
+import multer from "multer";
 
 import adminRouter from "./router/admin-route.js";
 import productRouter from "./router/shop-route.js";
@@ -56,21 +57,43 @@ app.use(
 	})
 );
 
-// serve static file
+// serve static file in public
 app.use(express.static(path.join(__dirname, "public")));
+app.use('/uploads',express.static(path.join(__dirname, "uploads")));
 
 // serve body in req
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// setup storage for multer
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, "uploads");
+	},
+	filename: (req, file, cb) => {
+		const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+		cb(null, uniqueSuffix+'-'+ file.originalname  );
+	},
+});
+
+// setup file filter to store only apropriate type of img
+const fileFilter = (req, file, cb) => {
+	if (file.mimetype === "image/jpeg" || file.mimetype === "image/png" || file.mimetype === "image/jpg") {
+		cb(null, true);
+	} else {
+		cb(null, false);
+	}
+};
+
+// setup multer for file-handler
+app.use(multer({ storage: storage, fileFilter: fileFilter }).single("img"));
+
 // mongodb connection
 //* override with POST having ?_method= PUT/DELETE
 app.use(methodOverride("_method"));
 
-
 // use flash message
 app.use(flash());
-
 
 // use csrf protection
 app.use(csrfProtection);
@@ -78,16 +101,16 @@ app.use(csrfProtection);
 // register csftToken to locals variables in res
 app.use((req, res, next) => {
 	res.locals.isAuthenticated = req.session.isLoggedIn;
-	res.locals.csrfToken = req.csrfToken(); 
+	res.locals.csrfToken = req.csrfToken();
 	res.locals.user_name = req.session.isLoggedIn
 		? req.session.user.name
 		: "Guest";
-	res.locals.oldInput = function(name){
+	res.locals.oldInput = function (name) {
 		return req.body[name];
-	}
-	
+	};
+
 	next();
-})
+});
 
 app.use((req, res, next) => {
 	if (!req.session.user) {
@@ -95,7 +118,7 @@ app.use((req, res, next) => {
 	}
 	User.findById(req.session.user._id)
 		.then((user) => {
-			if(!user) {
+			if (!user) {
 				return next();
 			}
 			req.user = user;
@@ -106,22 +129,18 @@ app.use((req, res, next) => {
 		});
 });
 
-
-
-
-
 // register router
 app.use("/admin", adminRouter);
 app.use(productRouter);
 app.use(authRouter);
 
-app.get('/500', errorHandler.get500ErrorPage);
+app.get("/500", errorHandler.get500ErrorPage);
 app.use(errorHandler.notFoundPage);
 
 // error handle middleware
-app.use((err,req,res, next)=>{
-	res.redirect('/500');
-})
+app.use((err, req, res, next) => {
+	res.redirect("/500");
+});
 
 mongoose
 	.connect(uri)

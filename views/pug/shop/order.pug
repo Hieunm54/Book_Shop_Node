@@ -9,10 +9,12 @@ block content
             ul.orders
                 each order in orders
                     li.orders__item 
-                        h1= `Order - # ${order._id}`
+                        h1= `Order - # ${order._id}  - `
+                            a(href=`/orders/${order._id}`) INVOICE  
                         ul.orders__products
                             each item in order.productList
                                 li.orders__products-item= `${item.title} x${item.quantity} `
+                    
                 //- h2= `Total price: ${total}`
         else
             h1= "You have not order anything"
