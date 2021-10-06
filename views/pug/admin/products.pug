@@ -23,14 +23,16 @@ block content
                             
                         .card__actions
                             a(href=`/admin/edit-product/${product._id}?edit=true` class="btn") Edit 
-                            form(action="/admin/delete-product?_method=DELETE" method="POST") 
-                                input(type="hidden" name='_csrf' value=`${csrfToken}`)
-                                input(type="hidden" name='id' value=`${product._id}`)
-                                input(type="hidden" name='imgUrl' value=`${product.imgUrl}`)
-                                button.btn(type="submit") Delete
+                            //- form(action="/admin/delete-product?_method=DELETE" method="POST") 
+                            input(type="hidden" name='_csrf' value=`${csrfToken}`)
+                            input(type="hidden" name='id' value=`${product._id}`)
+                            input(type="hidden" name='imgUrl' value=`${product.imgUrl}`)
+                            button.btn(type="button" onclick='deleteBtn(this)') Delete
 
         else 
             h2 No Products
+
+    script(src='/js/admin.js')
 
 
 

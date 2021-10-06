@@ -43,7 +43,7 @@ router.put(
 	adminController.updateProduct
 );
 
-router.delete("/delete-product", isAuth, adminController.deleteProduct);
+router.delete("/delete-product/:id", isAuth, adminController.deleteProduct);
 
 // router.get('/users',adminController.getUsers);
 // router.get('/add-user',adminController.getAddUser);

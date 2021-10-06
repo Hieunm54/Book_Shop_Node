@@ -1,13 +1,12 @@
 import mongoose from "mongoose";
 import Product from "../models/product.js";
-import {validationResult} from 'express-validator';
+import { validationResult } from "express-validator";
 
 import { deleteFile } from "../util/file.js";
 
 // import User from "../models/user.js"
 
 class AdminController {
-
 	// [GET] /admin/products
 	getAdminProduct = (req, res, next) => {
 		Product.find({ userId: req.user._id })
@@ -36,25 +35,24 @@ class AdminController {
 		});
 	};
 
-
 	// [POST ] /admin/add-product
 	postProduct = (req, res, next) => {
-		const { title,price, description } = req.body;
+		const { title, price, description } = req.body;
 		const image = req.file;
-		if(!image){
+		if (!image) {
 			return res.status(422).render("admin/add-product", {
 				title: "Shop",
 				path: "/admin/add-product",
-				errorValidation: 'Attach file is not an image'
+				errorValidation: "Attach file is not an image",
 			});
 		}
 		const errors = validationResult(req);
-		if( !errors.isEmpty()){
+		if (!errors.isEmpty()) {
 			// console.log('error when add new product',errors)
 			return res.status(422).render("admin/add-product", {
 				title: "Shop",
 				path: "/admin/add-product",
-				errorValidation: errors.array()[0].msg
+				errorValidation: errors.array()[0].msg,
 			});
 		}
 
@@ -76,7 +74,6 @@ class AdminController {
 				return res.redirect("/");
 			})
 			.catch((err) => {
-
 				const error = new Error(err);
 				error.httpStatusCode = 500;
 				return next(error);
@@ -111,19 +108,24 @@ class AdminController {
 	// [PUT] /admin/edit-product
 	updateProduct = (req, res, next) => {
 		// const id = req.body.id;
-		const {id, title, price, description } = req.body;
+		const { id, title, price, description } = req.body;
 		const image = req.file;
 		// console.log('image: ', image);
 
-
 		const errors = validationResult(req);
-		if( !errors.isEmpty()){
+		if (!errors.isEmpty()) {
 			// console.log('error when add new product',errors)
 			return res.status(422).render("admin/edit-product", {
 				title: "Edit Page",
-				product: { title, imgUrl: image.path, price, description,_id:id },
+				product: {
+					title,
+					imgUrl: image.path,
+					price,
+					description,
+					_id: id,
+				},
 				path: "/admin/edit-product",
-				errorValidation: errors.array()[0].msg
+				errorValidation: errors.array()[0].msg,
 				// authenticated: req.session.isLoggedIn,
 			});
 		}
@@ -135,7 +137,7 @@ class AdminController {
 				}
 				product.title = title;
 				product.price = price;
-				if(image){
+				if (image) {
 					deleteFile(product.imgUrl);
 					product.imgUrl = image.path;
 				}
@@ -185,20 +187,43 @@ class AdminController {
 
 	// [DELETE] /admin/delete-product
 	deleteProduct = (req, res, next) => {
-		const id = req.body.id;
-		// Cart.deleteProduct(id);
-		const imgUrl = req.body.imgUrl;
-		deleteFile(imgUrl);
-		Product.deleteOne({ _id: id, userId: req.user._id })
-			.then(()=>{
-				res.redirect("/admin/products");
+		const id = req.params.id;
+		console.log("delete id: " + id);
+
+		// const imgUrl = req.body.imgUrl;
+		Product.findById(id)
+			.then((product) => {
+				if (!product) {
+					return next(
+						new Error(
+							"Some error happend when deleting this product.Please try again."
+						)
+					);
+				}
+				const imgUrl = product.imgUrl;
+				deleteFile(imgUrl);
+				return Product.deleteOne({ _id: id, userId: req.user._id });
+			})
+			.then(() => {
+				console.log("delete successfully");
+				res.status(200).json({message:'Success!'});
 			})
 			.catch((err) => {
-				const error = new Error(err);
-				error.httpStatusCode = 500;
-				return next(error);
+				res.status(500).json({ err: err });
+				// const error = new Error(err);
+				// error.httpStatusCode = 500;
+				// return next(error);
 			});
-		
+
+		// Product.deleteOne({ _id: id, userId: req.user._id })
+		// 	.then(()=>{
+		// 		res.redirect("/admin/products");
+		// 	})
+		// 	.catch((err) => {
+		// 		const error = new Error(err);
+		// 		error.httpStatusCode = 500;
+		// 		return next(error);
+		// 	});
 	};
 
 	// [GET] /admin/users/
