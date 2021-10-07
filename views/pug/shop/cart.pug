@@ -18,9 +18,10 @@ block content
                                 input(type="hidden" name='id' value=`${p.productId._id}` )
                 hr
                 .centered
-                    form(action="/create-order" method="POST")
-                        input(type="hidden" name='_csrf' value=`${csrfToken}`)
-                        button.btn Order Now!
+                    //- form(action="/create-order" method="POST")
+                    //-     input(type="hidden" name='_csrf' value=`${csrfToken}`)
+                    //-     button.btn Order Now!
+                    a.btn(href="/checkout") Order Now!
         
                 //- h2= `Total price: ${total}`
         else

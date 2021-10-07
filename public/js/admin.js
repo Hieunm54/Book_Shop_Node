@@ -10,11 +10,11 @@ const deleteBtn = (btn) => {
 			"csrf-token": _csrf,
 		},
 	})
-		.then((result) => {
-			// console.log(result);
-            return result.json();
+		.then((response) => {
+			// console.log(response);
+            return response.json();
 		})
-        .then(data=>{
+        .then(data =>{
             console.log(data);
             productElement.parentNode.removeChild(productElement);
         })

@@ -1,10 +1,23 @@
 import fs from "fs";
 import path from "path";
+
+import dotenv from "dotenv";
+import Stripe from "stripe";
 import PDFDocument from "pdfkit";
+
 import Product from "../models/product.js";
 import Order from "../models/order.js";
 
 const ITEMS_PER_PAGE = 2;
+dotenv.config();
+
+//confige stripe
+let stripe = new Stripe(
+	"sk_test_51JhmMRAJmTM0iQwXbBczslzrFaWJQtpqxYPGPiNeihGkCB9rFvVHySiBkY0lsORmucL1HOC4cTpnT4mKAAlDa7rp00hdMLt7Yn",
+	{
+		apiVersion: "2020-08-27",
+	}
+);
 
 class ShopController {
 	// [GET] /
@@ -105,10 +118,10 @@ class ShopController {
 	};
 
 	// [GET] /cart
-	getCart = async (req, res, next) => {
+	getCart = (req, res, next) => {
 		const user = req.user;
 		//if user is not login => redirect to login page
-		await user
+		return user
 			.populate("cart.items.productId")
 			.then((products) => {
 				return res.render("shop/cart", {
@@ -121,9 +134,9 @@ class ShopController {
 				});
 			})
 			.catch((err) => {
-				// const error = new Error(err);
-				// error.httpStatusCode = 500;
-				// return next(error);
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
 			});
 	};
 
@@ -267,12 +280,69 @@ class ShopController {
 	};
 
 	getCheckout = (req, res, next) => {
-		res.render("shop/checkout", {
-			title: "My Checkout",
-			text: "This is my Checkout",
-			path: "/checkout",
-			// authenticated: req.session.isLoggedIn,
-		});
+		const user = req.user;
+		let myProduct;
+		let total = 0;
+		//if user is not login => redirect to login page
+		return user
+			.populate("cart.items.productId")
+			.then((products) => {
+				myProduct = products.cart.items;
+				myProduct.forEach((p) => {
+					total += p.quantity * p.productId.price;
+				});
+
+				return stripe.checkout.sessions
+					.create({
+						payment_method_types: ["card"],
+						line_items: myProduct.map((p) => {
+							return {
+								name: p.productId.title,
+								description: p.productId.description,
+								amount: Math.round(p.productId.price * 100),
+								currency: "usd",
+								quantity: p.quantity,
+							};
+						}),
+						success_url:
+							req.protocol +
+							"://" +
+							req.get("host") +
+							"/checkout/success",
+						cancel_url:
+							req.protocol +
+							"://" +
+							req.get("host") +
+							"/checkout/cancel",
+					})
+					.then((session) => {
+						// return res.send('hello')
+						res.render("shop/checkout", {
+							title: "My Checkout",
+							text: "This is my Checkout",
+							products: myProduct,
+							total: total,
+							path: "/checkout",
+							sessionId: session.id,
+						});
+					});
+			})
+			.catch((err) => {
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
+			});
+	};
+
+	getCheckoutSuccess = (req, res, next) => {
+		req.user
+			.addOrder()
+			.then(() => res.redirect("/order"))
+			.catch((err) => {
+				const error = new Error(err);
+				error.httpStatusCode = 500;
+				return next(error);
+			});
 	};
 }
 
